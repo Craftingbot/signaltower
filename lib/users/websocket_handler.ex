@@ -11,6 +11,9 @@ defmodule SignalTower.WebsocketHandler do
     {:ok, state}
   end
 
+
+  ## accept frames from client
+
   def websocket_handle({:text, msg}, room) do
     case Poison.decode(msg) do
       {:ok, parsed_msg} ->
@@ -26,13 +29,16 @@ defmodule SignalTower.WebsocketHandler do
     {:ok, state}
   end
 
+
+  ## accept action on server side and send result to client if needed 
+
   def websocket_info({:DOWN,_,_,pid,_}, room) do
+    Logger.debug "websocket connect is DOWN for #{inspect(pid)}"
     {:noreply, Session.handle_exit_message(pid, room)}
   end
 
-  def websocket_info({:timeout, _ref, msg}, state) do
-    Logger.debug "WebSocket timeout: #{inspect(msg)}"
-    {:reply, {:text, "{\"event\": \"error\", \"message\": \"WebSocket timeout: #{msg}\"}"}, state}
+  def websocket_info({:to_user, msg}, state) do
+    {:reply, {:text, internal_to_json(msg)}, state}
   end
 
   def websocket_info({:internal_error, msg}, state) do
@@ -41,12 +47,24 @@ defmodule SignalTower.WebsocketHandler do
     {:reply, {:text, "{\"event\": \"error\", \"message\": \"Internal Error: #{msg}\"}"}, state}
   end
 
-  def websocket_info(:kill, state) do
-    {:shutdown, state}
+
+  ## websocket terminate, here we just show some debug info, we really dont have
+  #to define them
+
+  def terminate({:remote, close_code, msg}, _req, state) do
+    Logger.debug("client removed with code#{close_code}")
   end
 
-  def websocket_info({:to_user, msg}, state) do
-    {:reply, {:text, internal_to_json(msg)}, state}
+  def terminate(:remote, _req, state) do
+    Logger.debug("client removed")
+  end
+
+  def terminate(:timeout, _req, state) do
+    Logger.debug("ws timeout #{inspect(self())}")
+  end
+
+  def terminate(reason, req, state) do
+    Logger.debug("ws terminate, #{inspect([reason, req, state])}")
   end
 
   defp internal_to_json(msg) do
@@ -58,9 +76,5 @@ defmodule SignalTower.WebsocketHandler do
         error_msg = Poison.encode! %{event: "error", message: "internal_server_error"}
         error_msg
     end
-  end
-
-  def websocket_terminate(_reason, _req, _state) do
-    :ok
   end
 end
