@@ -2,6 +2,10 @@ require Logger
 defmodule SignalTower.RoomMember do
   defstruct peer_id: nil, pid: nil, status: nil
 
+  # peer_id is the number that represent user, is generated from get_next_id
+  # pid is the websocket pid
+  # status has user info such as agents
+
   defimpl Poison.Encoder do
     def encode(member, options) do
       member
@@ -26,7 +30,6 @@ defmodule SignalTower.Room do
   end
 
   def join_and_monitor(room_id, status) do
-    Logger.info("start room #{room_id}")
     room_pid = RoomSupervisor.get_room(room_id)
     Process.monitor(room_pid)
     own_id = GenServer.call(room_pid, {:join, self(), status})
@@ -112,6 +115,7 @@ defmodule SignalTower.Room do
 
   defp send_to_all(members, msg) do
     members |> Enum.each(fn({_,member}) ->
+      Logger.debug("notify this msg #{msg.event} to #{member.peer_id}")
       send(member.pid, {:to_user, msg})
     end)
   end
@@ -128,7 +132,6 @@ defmodule SignalTower.Room do
   end
 
   defp send_new_peer(members, peer_id, status) do
-    Logger.info("user #{peer_id} create new room")
     response_for_other_peers = %{
       event: "new_peer",
       peer_id: peer_id,
@@ -139,7 +142,6 @@ defmodule SignalTower.Room do
   end
 
   defp send_peer_left(members, peer_id) do
-    Logger.info("user #{peer_id} left room")
     leave_msg = %{
       event: "peer_left",
       sender_id: peer_id

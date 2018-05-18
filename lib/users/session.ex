@@ -1,6 +1,9 @@
 require Logger
 defmodule SignalTower.RoomMembership do
   defstruct id: "", pid: nil, own_id: "", own_status: %{}
+  # pid is the room pid
+  # id is the room name
+  # own_id is the user's id
 end
 
 defmodule SignalTower.Session do
@@ -32,6 +35,7 @@ defmodule SignalTower.Session do
   end
 
   defp incoming_message(msg = %{"event" => "send_to_peer"}, room) do
+    Logger.debug("start to send to peer #{room.own_id} #{inspect(msg)}")
     GenServer.cast room.pid, {:send_to_peer, msg["peer_id"], msg["data"], room.own_id}
     room
   end

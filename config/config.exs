@@ -10,11 +10,11 @@ use Mix.Config
 
 # Sample configuration:
 #
-#     config :logger, :console,
-#       level: :info,
-#       format: "$date $time [$level] $metadata$message\n",
-#       metadata: [:user_id]
-config :logger, backends: [{LoggerFileBackend, :info_log}, {LoggerFileBackend, :warn_log},{LoggerFileBackend, :debug_log}, {LoggerFileBackend, :error_log}]
+config :logger, :console,
+  level: :debug,
+  format: "$date $time [$level] $metadata$message\n"
+
+config :logger, backends: [:console, {LoggerFileBackend, :info_log}, {LoggerFileBackend, :warn_log},{LoggerFileBackend, :debug_log}, {LoggerFileBackend, :error_log}]
 config :logger, :info_log, path: "./logs/info.log", level: :info
 config :logger, :warn_log, path: "./logs/warn.log", level: :warn
 config :logger, :debug_log, path: "./logs/debug.log", level: :debug

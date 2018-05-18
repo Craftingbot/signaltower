@@ -9,9 +9,10 @@ defmodule SignalTower.RoomSupervisor do
   end
 
   def get_room(room_id) do
-    Logger.info("start room #{room_id}")
     case Supervisor.start_child(RoomSupervisor, [room_id]) do
-      {:ok, pid} -> pid
+      {:ok, pid} ->
+        Logger.debug("start a new room for #{room_id}")
+        pid
       {:error, {:already_started, pid}} -> pid
     end
   end
