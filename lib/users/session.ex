@@ -1,3 +1,4 @@
+require Logger
 defmodule SignalTower.RoomMembership do
   defstruct id: "", pid: nil, own_id: "", own_status: %{}
 end
@@ -44,6 +45,7 @@ defmodule SignalTower.Session do
   def handle_exit_message(pid, room) do
     if pid == room.pid do
       # current room died => automatic rejoin
+      Logger.error("exists room: #{room.id}, #{room.own_status}")
       Room.join_and_monitor(room.id, room.own_status)
     else
       room

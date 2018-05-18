@@ -1,3 +1,4 @@
+require Logger
 defmodule SignalTower.RouterHandler do
 
   def init(req, state) do
@@ -16,7 +17,7 @@ defmodule SignalTower.RouterHandler do
   end
 
   def terminate(reason, req, state) do
-    # IO.puts "#{reason}, #{inspect req}, #{inspect state}"
+    Logger.error("Terminate: #{reason}, #{inspect req}, #{inspect state}")
     :ok
   end
 end

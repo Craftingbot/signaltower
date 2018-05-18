@@ -1,3 +1,4 @@
+require Logger
 defmodule SignalTower.RoomMember do
   defstruct peer_id: nil, pid: nil, status: nil
 
@@ -23,8 +24,9 @@ defmodule SignalTower.Room do
     name = "room_#{room_id}" |> String.to_atom
     GenServer.start_link(__MODULE__, room_id, name: name)
   end
-  
+
   def join_and_monitor(room_id, status) do
+    Logger.info("start room #{room_id}")
     room_pid = RoomSupervisor.get_room(room_id)
     Process.monitor(room_pid)
     own_id = GenServer.call(room_pid, {:join, self(), status})
@@ -79,6 +81,7 @@ defmodule SignalTower.Room do
   end
 
   def handle_cast {:leave, peer_id}, state do
+    Logger.info("leave peer #{peer_id}")
     leave(peer_id, state)
   end
 
@@ -93,6 +96,7 @@ defmodule SignalTower.Room do
   end
 
   defp leave(peer_id, state = {room_id,members}) do
+    Logger.info("leave peer #{peer_id}")
     if members[peer_id] do
       next_members = Map.delete(members, peer_id)
       if Map.size(next_members) > 0 do
@@ -113,6 +117,7 @@ defmodule SignalTower.Room do
   end
 
   defp send_joined_room(pid, peer_id, members) do
+    Logger.info("user #{peer_id} joined room")
     response_for_joined_peer = %{
       event: "joined_room",
       own_id: peer_id,
@@ -123,6 +128,7 @@ defmodule SignalTower.Room do
   end
 
   defp send_new_peer(members, peer_id, status) do
+    Logger.info("user #{peer_id} create new room")
     response_for_other_peers = %{
       event: "new_peer",
       peer_id: peer_id,
@@ -133,6 +139,7 @@ defmodule SignalTower.Room do
   end
 
   defp send_peer_left(members, peer_id) do
+    Logger.info("user #{peer_id} left room")
     leave_msg = %{
       event: "peer_left",
       sender_id: peer_id

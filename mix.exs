@@ -16,7 +16,7 @@ defmodule SignalTower.Mixfile do
   def application do
     [
       mod: { SignalTower, [] },
-      applications: [:logger, :cowboy, :poison]
+      applications: [:logger, :cowboy, :poison, :logger_file_backend]
     ]
   end
 
@@ -33,7 +33,8 @@ defmodule SignalTower.Mixfile do
     [
       {:cowboy, "~> 2.3"},
       {:poison, "~> 3.0.0"},
-      {:distillery, "~> 1.4.0"}
+      {:distillery, "~> 1.4.0"},
+      {:logger_file_backend, "~> 0.0.10"}
     ]
   end
 end

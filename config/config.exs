@@ -14,6 +14,11 @@ use Mix.Config
 #       level: :info,
 #       format: "$date $time [$level] $metadata$message\n",
 #       metadata: [:user_id]
+config :logger, backends: [{LoggerFileBackend, :info_log}, {LoggerFileBackend, :warn_log},{LoggerFileBackend, :debug_log}, {LoggerFileBackend, :error_log}]
+config :logger, :info_log, path: "./logs/info.log", level: :info
+config :logger, :warn_log, path: "./logs/warn.log", level: :warn
+config :logger, :debug_log, path: "./logs/debug.log", level: :debug
+config :logger, :error_log, path: "./logs/error.log", level: :error
 
 # It is also possible to import configuration files, relative to this
 # directory. For example, you can emulate configuration per environment
