@@ -17,8 +17,7 @@ defmodule SignalTower do
 
     dispatch = :cowboy_router.compile([
       {:_, [
-        {"/", SignalTower.RouterHandler, []},
-        {"/ws/[...]", SignalTower.WebsocketHandler, []}
+        {"/[...]", SignalTower.WebsocketHandler, []}
       ]}
     ])
 
