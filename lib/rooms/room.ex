@@ -99,13 +99,14 @@ defmodule SignalTower.Room do
   end
 
   defp leave(peer_id, state = {room_id,members}) do
-    Logger.info("leave peer #{peer_id}")
     if members[peer_id] do
+      Logger.info("leave peer #{peer_id}")
       next_members = Map.delete(members, peer_id)
       if Map.size(next_members) > 0 do
         send_peer_left(next_members, peer_id)
         {:noreply, {room_id, next_members}}
       else
+        Logger.info("kill this room #{room_id}")
         {:stop, :normal, {room_id, next_members}}
       end
     else
