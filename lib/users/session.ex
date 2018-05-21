@@ -10,7 +10,7 @@ defmodule SignalTower.Session do
   alias SignalTower.Room
   alias SignalTower.MsgIntegrity
   # use GenServer
-
+  #
   def handle_message(msg, room) do
     case MsgIntegrity.check(msg, room) do
       {:ok, msg} ->
@@ -57,6 +57,7 @@ defmodule SignalTower.Session do
   end
 
   defp send_error(error, received_msg) do
+    Logger.error("#{inspect(error)}, #{inspect(received_msg)}")
     send self(), {:to_user, %{
       event: "error",
       description: error,

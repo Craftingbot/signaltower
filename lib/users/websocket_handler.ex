@@ -14,9 +14,13 @@ defmodule SignalTower.WebsocketHandler do
 
 
   ## accept frames from client
+  #
+  def websocket_handle({:text, "ping"}, room) do
+    Logger.debug("send back pong")
+    {:reply, {:text, "pong"}, room}
+  end
 
   def websocket_handle({:text, msg}, room) do
-    Logger.debug("#{inspect(msg)}")
     case Poison.decode(msg) do
       {:ok, parsed_msg} ->
         {:ok, Session.handle_message(parsed_msg, room)}
@@ -53,26 +57,27 @@ defmodule SignalTower.WebsocketHandler do
   ## websocket terminate, here we just show some debug info, we really dont have
   #to define them
 
-  def terminate({:remote, close_code, msg}, _req, room) do
-    Logger.debug("client removed with code#{close_code}")
-    if room do
-      Session.handle_message(%{"event" => "leave_room"}, room)
-    end
-  end
+  # def terminate({:remote, close_code, msg}, _req, room) do
+  #   Logger.debug("client removed with code#{close_code}")
+  #   if room do
+  #     Session.handle_message(%{"event" => "leave_room", "room_id" => room.id}, room)
+  #   end
+  # end
 
-  def terminate(:remote, _req, room) do
-    Logger.debug("client removed")
-    if room do
-      Session.handle_message(%{"event" => "leave_room"}, room)
-    end
-  end
+  # def terminate(:remote, _req, room) do
+  #   Logger.debug("client removed")
+  #   if room do
+  #     Session.handle_message(%{"event" => "leave_room", "room_id" => room.id}, room)
+  #   end
+  # end
 
   def terminate(:timeout, _req, state) do
     Logger.debug("ws timeout #{inspect(self())}")
   end
 
   def terminate(reason, req, state) do
-    Logger.debug("ws terminate, #{inspect([reason, req, state])}")
+    Logger.debug("ws terminate with reason #{inspect(reason)}")
+    # Logger.debug("ws terminate, #{inspect([reason, req, state])}")
   end
 
   defp internal_to_json(msg) do
